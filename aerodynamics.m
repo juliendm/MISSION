@@ -1,5 +1,9 @@
 
-function [cd,cl,rho,p,Tenv,mach,rey1m] = get_cd_cl_rho_p_respsurf(n,h,lon,glat,aoa_deg,v,tt,re,date0_doy,date0_sec,atm_model,ar_flag,dv1,dv2,dv3,dv4);
+%-----------------------------------------------%
+% Begin Function: aerodynamics                  %
+%-----------------------------------------------%
+
+function [cd,cl,rho,p,Tenv,mach,rey1m] = aerodynamics(n,h,lon,glat,aoa_deg,v,tt,re,date0_doy,date0_sec,atm_model,ar_flag,dv1,dv2,dv3,dv4);
 
     max_mach_eval_sub = 0.95;
     min_mach_eval_sup = 1.1;
@@ -70,3 +74,7 @@ function [cd,cl,rho,p,Tenv,mach,rey1m] = get_cd_cl_rho_p_respsurf(n,h,lon,glat,a
     end
 
 end
+
+%-----------------------------------------------%
+% End Function:  aerodynamics                   %
+%-----------------------------------------------%

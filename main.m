@@ -68,7 +68,7 @@ auxdata.date0 = '2010 MAY 01 11:00:00.000';
 %%
 
 %
-% SOAR ascent
+% VEHICLE ascent
 %            
 t_min    = 0.0       ; t_max    = 400.0;
 h_min    = 1e3       ; h_max    = 200e3;
@@ -207,8 +207,9 @@ bounds.phase(ph).control.lower(1) = 0;  % force daoa=0
 bounds.phase(ph).control.upper(1) = 0;  %
 
 %
-% SOAR descent
+% VEHICLE descent
 % 
+
 t_min    = 0.0       ; t_max    = 3000.0;
 h_min    = -40E3     ; h_max    = 200e3;
 
@@ -441,7 +442,7 @@ bounds.eventgroup(10).upper = [0];             %
 %%
 %% optimizer setup
 %%
-setup.name = 's3to-trajectory-optimization';
+setup.name = 'trajectory-optimization';
 setup.functions.continuous = @continuous;
 setup.functions.endpoint = @endpoint;
 setup.nlp.solver = 'snopt';

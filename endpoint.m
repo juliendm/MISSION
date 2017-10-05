@@ -1,6 +1,8 @@
+
 %-----------------------------------------------%
-% Begin Function:  s3toEndpoint                 %
+% Begin Function:  endpoint                     %
 %-----------------------------------------------%
+
 function output = s3toEndpoint(input)
 
 	%
@@ -87,8 +89,9 @@ function output = s3toEndpoint(input)
 	output.eventgroup(10).event = [x0{2}(7) - xf{2}(7) - input.auxdata.fuel_mass];
 
 end
+
 %-----------------------------------------------%
-% End Function:  s3toEndpoint                   %
+% End Function:  endpoint                       %
 %-----------------------------------------------%
 
 function dry_mass = dry_mass(dv_geo1,dv_geo2,dv_geo3,dv_geo4)

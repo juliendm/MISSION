@@ -2,6 +2,7 @@
 %--------------------------------------%
 % BEGIN: function dynamics             %
 %--------------------------------------%
+
 function [dr,dlon,dlat,dv,dgam,dal,dm,da,db,d1,d2,d3,d4,pdyn,hr,nx,ny,nz,thu,cd,cl,rho,p,Tenv,mach,rey1m] = dynamics(in,auxdat,state,pha)
 
   re = auxdat.re;
@@ -54,7 +55,7 @@ function [dr,dlon,dlat,dv,dgam,dal,dm,da,db,d1,d2,d3,d4,pdyn,hr,nx,ny,nz,thu,cd,
   %     double(glat),double(aoa*180/pi),double(v),double(tt),double(re),...
   %     int32(date0_doy),double(date0_sec),int32(atm_model),int32(ar_flag));
 
-  [cd,cl,rho,p,Tenv,mach,rey1m] = get_cd_cl_rho_p_respsurf(n,h,lon,...
+  [cd,cl,rho,p,Tenv,mach,rey1m] = aerodynamics(n,h,lon,...
       glat,aoa*180/pi,v,tt,re,...
       date0_doy,date0_sec,atm_model,ar_flag,...
       dv1,dv2,dv3,dv4);
@@ -172,7 +173,8 @@ function [dr,dlon,dlat,dv,dgam,dal,dm,da,db,d1,d2,d3,d4,pdyn,hr,nx,ny,nz,thu,cd,
   [pdyn,hr] = get_pdyn_hr(in,auxdat,'soar');
 
 end
+
 %------------------------------------%
-% END: function dyn                  %
+% END: function dynamics             %
 %------------------------------------%
 

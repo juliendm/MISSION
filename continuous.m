@@ -1,6 +1,8 @@
+
 %--------------------------------------%
-% BEGIN: function s3toContinuous       %
+% BEGIN: function continuous           %
 %--------------------------------------%
+
 function phaseout = s3toContinuous(input)
 
   engine_state = {'off' 'on' 'off' 'off' 'off' 'off'};
@@ -27,8 +29,9 @@ function phaseout = s3toContinuous(input)
   end
 
 end
+
 %------------------------------------%
-% END: function s3toContinuous       %
+% END: function continuous           %
 %------------------------------------%
 
 
