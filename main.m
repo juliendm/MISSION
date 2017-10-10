@@ -69,7 +69,7 @@ auxdata.date0 = '2010 MAY 01 11:00:00.000';
 
 %
 % VEHICLE ascent
-%            
+%
 t_min    = 0.0       ; t_max    = 400.0;
 h_min    = 1e3       ; h_max    = 200e3;
 
@@ -130,8 +130,8 @@ autofillPhase();
 
 bounds.phase(ph).initialtime.lower = t_0;                                                   % initial conditions
 bounds.phase(ph).initialtime.upper = t_0;                                                   % (heading is free)
-bounds.phase(ph).initialstate.lower = [r_0,lon_0,lat_0,v_0,gam_0,al_min,dry_mass_min+auxdata.us_mass+auxdata.fuel_mass,aoa_0,bank_0,dv1_0,dv2_0,dv3_0,dv4_0];  %
-bounds.phase(ph).initialstate.upper = [r_0,lon_0,lat_0,v_0,gam_0,al_max,dry_mass_max+auxdata.us_mass+auxdata.fuel_mass,aoa_0,bank_0,dv1_0,dv2_0,dv3_0,dv4_0];  %
+bounds.phase(ph).initialstate.lower = [r_0,lon_0,lat_0,v_0,gam_0,al_min,dry_mass_min+auxdata.us_mass+auxdata.fuel_mass,aoa_0,bank_0,dv1_min,dv2_min,dv3_min,dv4_min];  %
+bounds.phase(ph).initialstate.upper = [r_0,lon_0,lat_0,v_0,gam_0,al_max,dry_mass_max+auxdata.us_mass+auxdata.fuel_mass,aoa_0,bank_0,dv1_max,dv2_max,dv3_max,dv4_max];  %
 bounds.phase(ph).control.lower(1) = 0;                                                      % force daoa=0
 bounds.phase(ph).control.upper(1) = 0;                                                      %
 
@@ -208,7 +208,7 @@ bounds.phase(ph).control.upper(1) = 0;  %
 
 %
 % VEHICLE descent
-% 
+%
 
 t_min    = 0.0       ; t_max    = 3000.0;
 h_min    = -40E3     ; h_max    = 200e3;
@@ -223,7 +223,7 @@ m_min    = dry_mass_min  ; m_max    = dry_mass_max;
 
 aoa_min  = -10*d2r   ; aoa_max  = 70.0*d2r;
 bank_min = 0*d2r     ; bank_max = 90*d2r;
-daoa_min  = -1*d2r   ; daoa_max = 0.1*d2r;   
+daoa_min  = -1*d2r   ; daoa_max = 0.1*d2r;
 dbank_min = -5*d2r   ; dbank_max= 5*d2r;
 
 dv1_min = -0.5   ; dv1_max = 0.5;
@@ -269,9 +269,9 @@ ddv4_0 = 0.0       ; ddv4_f = 0.0;
 autofillPhase();
 
 bounds.phase(ph).control.lower(1) = 0*d2r;                                           % 0 < daoa < 1
-bounds.phase(ph).control.upper(1) = 1*d2r;                                           % 
+bounds.phase(ph).control.upper(1) = 1*d2r;                                           %
 bounds.phase(ph).control.lower(2) = 0*d2r;                                           % dbank = 0
-bounds.phase(ph).control.upper(2) = 0*d2r;                                           % 
+bounds.phase(ph).control.upper(2) = 0*d2r;                                           %
 
 %------- Phase 5 -------%
 ph=5;N=50;
@@ -306,9 +306,9 @@ ddv4_0 = 0.0       ; ddv4_f = 0.0;
 autofillPhase();
 
 bounds.phase(ph).control.lower(1) = -4*d2r;                                          % -4 < daoa < 0
-bounds.phase(ph).control.upper(1) = 0*d2r;                                           % 
+bounds.phase(ph).control.upper(1) = 0*d2r;                                           %
 bounds.phase(ph).control.lower(2) = -5*d2r;                                          % -5 < dbank < 5
-bounds.phase(ph).control.upper(2) = 5*d2r;                                           % 
+bounds.phase(ph).control.upper(2) = 5*d2r;                                           %
 
 bounds.phase(ph).state.lower(9) = 0*d2r;                                             % 0 < bank < 90
 bounds.phase(ph).state.upper(9) = 90*d2r;                                            %
@@ -351,9 +351,9 @@ ddv4_0 = 0.0       ; ddv4_f = 0.0;
 autofillPhase();
 
 bounds.phase(ph).control.lower(1) = -0.1*d2r;                                        % -0.1 < daoa < 0.1
-bounds.phase(ph).control.upper(1) = 0.1*d2r;                                         % 
+bounds.phase(ph).control.upper(1) = 0.1*d2r;                                         %
 bounds.phase(ph).control.lower(2) = -1*d2r;                                          % -1 < dbank < 1
-bounds.phase(ph).control.upper(2) = 1*d2r;                                           % 
+bounds.phase(ph).control.upper(2) = 1*d2r;                                           %
 
 bounds.phase(ph).state.lower(8) = 0*d2r;                                             % 0 < aoa < 15
 bounds.phase(ph).state.upper(8) = 15*d2r;                                            %
@@ -369,7 +369,7 @@ glat = 34.919316233549665*d2r;
 [r_lnd,lon_lnd,lat_lnd] = geolat(int32(1),auxdata.re,auxdata.f_ell,h,lon,glat);
 
 bounds.phase(ph).finalstate.lower(1) = r_lnd+200;                                   % altitude (landing conditions)
-bounds.phase(ph).finalstate.upper(1) = r_lnd+400;                                   % 
+bounds.phase(ph).finalstate.upper(1) = r_lnd+400;                                   %
 
 bounds.phase(ph).finalstate.lower(2) = lon_lnd;                                     % longitude
 bounds.phase(ph).finalstate.upper(2) = lon_lnd;                                     %
@@ -388,30 +388,32 @@ bounds.phase(ph).finalstate.upper(9) = 0*d2r;                                   
 %
 % integral bounds
 %
+
 for k=4:6
 	guess.phase(k).integral = 0;
 	bounds.phase(k).integral.lower = 0;
 	bounds.phase(k).integral.upper = 10000;
 end
 
-% %
-% % constraints on pdyn,hr,nz
-% %
-% pdyn_min  = 0.0      ; pdyn_max = 100E3;
-% hr_min    = 0.0      ; hr_max   = 100E3;
-% nz_min  = 0.0        ; nz_max = 10;
-% for k=1:3
-% bounds.phase(k).path.lower = [pdyn_min,hr_min,nz_min];
-% bounds.phase(k).path.upper = [pdyn_max,hr_max,nz_max];
-% end
+%
+% constraints on pdyn,hr,nz
+%
 
-% pdyn_min  = 0.0      ; pdyn_max = 10E3;
-% hr_min    = 0.0      ; hr_max   = 65E3;
-% nz_min  = 0.0        ; nz_max = 5.0;
-% for k=4:6
-% bounds.phase(k).path.lower = [pdyn_min,hr_min,nz_min];
-% bounds.phase(k).path.upper = [pdyn_max,hr_max,nz_max];
-% end
+pdyn_min  = 0.0      ; pdyn_max = 100E3;
+hr_min    = 0.0      ; hr_max   = 100E3;
+nz_min  = 0.0        ; nz_max = 10;
+for k=1:3
+	bounds.phase(k).path.lower = [pdyn_min,hr_min,nz_min];
+	bounds.phase(k).path.upper = [pdyn_max,hr_max,nz_max];
+end
+
+pdyn_min  = 0.0      ; pdyn_max = 30E3;        % 10E3;
+hr_min    = 0.0      ; hr_max   = 230E3;       % 65E3;
+nz_min    = 0.0      ; nz_max   = 10;          % 5.0;
+for k=4:6
+	bounds.phase(k).path.lower = [pdyn_min,hr_min,nz_min];
+	bounds.phase(k).path.upper = [pdyn_max,hr_max,nz_max];
+end
 
 %%
 %% bounds for event constraints
@@ -506,29 +508,24 @@ elseif restart == 2
 
     setup.guess = init.output.result.solution;
     setup.mesh = init.output.result.setup.mesh;
-	
+
 end
 
 setup.nlp.options.maxiterations = 20;
 setup.mesh.maxiteration = 1;
 
-% output = init.output;
-output = gpops2(setup);
 
-%
-% 2nd run
-%
-%setup.guess=output.result.solution;     % using previous solution and meshing
-%setup.mesh=output.result.setup.mesh;    %
-%
-%setup.nlp.options.maxiterations = 20;
-%setup.mesh.maxiteration = 2;
-%output = gpops2(setup);
+compute_first_run = 0;
+
+if compute_first_run == 1
+	output = gpops2(setup);
+else
+	output = init.output;
+end
 
 %%
 %% save & plot
 %%
-%plotSolution(output.result.solution);
 
 disp('Output')
 write_outputs(output.result.interpsolution,[1:6],'soar',auxdata);
@@ -541,74 +538,114 @@ disp('Done')
 % clear mex; % clear mex memory
 
 %%
-%% optional smoothing
+%% optional smoothing and filtering
 %%
 
-
-% %
-% % determining smoothing parameters
-% %
-% sp=[0.001 0.01 0.001 0.00001 0.01 0.000001];
-% k=6
-% tt=output.result.solution.phase(k).time;
-% xx=output.result.solution.phase(k).state(:,8);
-% yy=output.result.solution.phase(k).state(:,9);
-
-% fxx=fit(tt,xx,'smoothingspline',fitoptions('Method','Smooth','SmoothingParam',sp(k)));
-% fyy=fit(tt,yy,'smoothingspline',fitoptions('Method','Smooth','SmoothingParam',sp(k)));
-
-% figure;
-% subplot(1,2,1)
-% plot(fxx,tt,xx)
-% subplot(1,2,2)
-% plot(fyy,tt,yy)
-
 smooth = 1;
+filter = 0;
 
 if smooth == 1
 
-	sp=[0.001 0.01 0.001 0.00001 0.01 0.000001];
-	for k=1:length(sp)
-		tt=output.result.solution.phase(k).time;
-		xx=output.result.solution.phase(k).state(:,8);
-		yy=output.result.solution.phase(k).state(:,9);
-		fxx=fit(tt,xx,'smoothingspline',fitoptions('Method','Smooth','SmoothingParam',sp(k)));
-		fyy=fit(tt,yy,'smoothingspline',fitoptions('Method','Smooth','SmoothingParam',sp(k)));
-		dxx=differentiate(fxx,tt);
-		dyy=differentiate(fyy,tt);
-		xx=fxx(tt);
-		yy=fyy(tt);
-		output.result.solution.phase(k).state(:,8)=xx;
-		output.result.solution.phase(k).state(:,9)=yy;
-		output.result.solution.phase(k).control(:,1)=dxx;
-		output.result.solution.phase(k).control(:,2)=dyy;
+	sp = [0.001 0.01 0.001 0.00001 0.01 0.000001];
+        N = [10 50 10 50 50 50];
+
+	for k=1:6
+
+		tt = output.result.solution.phase(k).time;
+
+		if filter == 1
+	                tt_filtered = linspace(tt(1),tt(end),N(k)+1);
+		else
+			tt_filtered = tt;
+		end
+
+		%
+		% Solution
+		%
+
+                for s = 1:13
+
+			xx = output.result.solution.phase(k).state(:,s);
+			fxx = fit(tt,xx,'smoothingspline',fitoptions('Method','Smooth','SmoothingParam',sp(k)));
+
+			xx_filtered = fxx(tt_filtered);
+			new_phase(k).state(:,s) = xx_filtered;
+
+			if s > 7
+	                        dxx_filtered = differentiate(fxx,tt_filtered);
+				new_phase(k).control(:,s-7) = dxx_filtered;
+			end
+
+		end
+
+		output.result.solution.phase(k).time = tt_filtered;
+		output.result.solution.phase(k).state = new_phase(k).state;
+		output.result.solution.phase(k).control = new_phase(k).control;
+
+		%
+		% Mesh
+		%
+
+		if filter == 1
+			mesh_phase(k).colpoints = N(k);
+	                mesh_phase(k).fraction = 1;
+		end
+
 	end
 
-	% initialitaion (linterp)
-	% get_cd_cl_rho_p();
-	get_rnose();
-
-	setup.guess=output.result.solution;     % using previous solution and meshing
-	setup.mesh=output.result.setup.mesh;    %
-
-	setup.nlp.options.maxiterations = 20;
-	setup.mesh.maxiteration = 10;
-	output = gpops2(setup);
-
-
-
-
-	disp('Output')
-	write_outputs(output.result.interpsolution,[1:6],'soar',auxdata);
-	disp('klm')
-	make_kml(output.result);
-	disp('Solution')
-	save('output','output');
-	disp('Done')
-
-	% clear mex; % clear mex memory
+	if filter == 1
+		output.result.setup.mesh.phase = mesh_phase;
+	end
 
 end
+
+
+
+
+
+
+
+%%
+%% 2nd run
+%%
+
+
+% initialitaion (linterp)
+% get_cd_cl_rho_p();
+get_rnose();
+
+
+
+
+
+setup.guess = output.result.solution;     % using previous solution and meshing
+setup.mesh = output.result.setup.mesh;    %
+
+setup.nlp.options.maxiterations = 20;
+setup.mesh.maxiteration = 10;
+
+
+compute_second_run = 0;
+
+if compute_second_run == 1
+	output = gpops2(setup);
+end
+
+%%
+%% save & plot
+%%
+
+disp('Output')
+%write_outputs(output.result.interpsolution,[1:6],'soar',auxdata);
+write_outputs(output.result.solution,[1:6],'soar',auxdata);
+disp('klm')
+make_kml(output.result);
+disp('Solution')
+save('output','output');
+disp('Done')
+
+% clear mex; % clear mex memory
+
 
 
 

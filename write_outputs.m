@@ -15,6 +15,8 @@ function [tstate,tctrl,ttime,tph,tphid] = write_outputs(interp,phases,type,auxda
     fid = fopen(fname,'w');
     fprintf(fid,'VARIABLES = "time","ph","h","lon","lat","v","gam","al","m","aoa","bank","dv1","dv2","dv3","dv4","pdyn","hr","nx","ny","nz","thu","cd","cl","rho","p","Tenv","mach","rey1m"\n');
 
+%    fprintf(fid,'VARIABLES = "time","ph","h","lon","lat","v","gam","al","m","aoa","bank","dv1","dv2","dv3","dv4"\n');
+
     for ip = phases
 
         data = interp.phase(ip);
@@ -51,9 +53,13 @@ function [tstate,tctrl,ttime,tph,tphid] = write_outputs(interp,phases,type,auxda
             [alt,lon_conv,glat_conv] = latgeo(int32(1),auxdata.re,auxdata.f_ell,r(k),lon(k),lat(k));
             h = alt/1000;
 
-            fprintf(fid,'%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n',...
+            fprintf(fid,'%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n',...
                 time(k),ip,h,lon(k)*r2d,lat(k)*r2d,v(k),gam(k)*r2d,al(k)*r2d,m(k),aoa(k)*r2d,bank(k)*r2d,dv1(k),dv2(k),dv3(k),dv4(k),...
                 pdyn(k),hr(k),nx(k),ny(k),nz(k),thu(k),cd(k),cl(k),rho(k),p(k),Tenv(k),mach(k),rey1m(k));
+
+%            fprintf(fid,'%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n',...
+%                time(k),ip,r(k),lon(k)*r2d,lat(k)*r2d,v(k),gam(k)*r2d,al(k)*r2d,m(k),aoa(k)*r2d,bank(k)*r2d,dv1(k),dv2(k),dv3(k),dv4(k));
+
 
         end
 
