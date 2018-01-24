@@ -60,7 +60,7 @@ function output = s3toEndpoint(input)
 	gam = xf{3}(5);
 	al  = xf{3}(6);
 	[alt,lon,glat] = latgeo(int32(1),input.auxdata.re,input.auxdata.f_ell,r,lon,lat);
-	output.eventgroup(7).event = [alt];
+	output.eventgroup(7).event = [gam, alt];
 
 	%
 	% regularization for re-entry
@@ -78,6 +78,11 @@ function output = s3toEndpoint(input)
 	dv_geo3 = xf{6}(9+3);
 	dv_geo4 = xf{6}(9+4);
 
+	% dv_geo1 = 0.0;
+	% dv_geo2 = 0.0;
+	% dv_geo3 = 0.0;
+	% dv_geo4 = 0.0;
+
 	dry_mass = dry_mass(dv_geo1,dv_geo2,dv_geo3,dv_geo4);
 	output.eventgroup(9).event = [xf{6}(7) - dry_mass];
 
@@ -87,6 +92,17 @@ function output = s3toEndpoint(input)
 	%
 
 	output.eventgroup(10).event = [x0{2}(7) - xf{2}(7) - input.auxdata.fuel_mass];
+
+	%
+	% landing heading
+	% event group 11
+	%
+
+	al  = xf{6}(6);
+
+	output.eventgroup(11).event = [al - 2*pi*floor(al/2/pi)];
+
+
 
 end
 
@@ -150,7 +166,14 @@ function dry_mass = dry_mass(dv_geo1,dv_geo2,dv_geo3,dv_geo4)
 
   projected_area = 80.0 + 2.0*area;
 
-  dry_mass = 150.0 * projected_area - 10000.0;
+%  dry_mass = 150.0 * projected_area - 10000.0;
+
+  dry_mass = 90.0 * projected_area - 2900.0;
+
+  % IS TOO HEAVY, WINGS DO NOT HAVE ENAUGH LIFT FOR LANDING PHASE
+  % IS AT AOA 10 ALL THE TIME AND WING AREAS ARE GETTING AS BIG AS THEY CAN
+  % REDUCING MAX SPEED ACHIEVABLE
+  % dry_mass = 105.927 * projected_area - 697.025;
 
 end
 

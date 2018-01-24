@@ -5,17 +5,18 @@
 
 function phaseout = s3toContinuous(input)
 
-  engine_state = {'off' 'on' 'off' 'off' 'off' 'off'};
-  pha = {'a' 'a' 'a' 'r' 'r' 'r'};
-
   Nph = length(input.phase);
 
   for k=1:Nph
 
-    [dr,dlon,dlat,dv,dgam,dal,dm,da,db,d1,d2,d3,d4,pdyn,hr,nx,ny,nz,thu,cd,cl,rho,p,Tenv,mach,rey1m] = dynamics(input.phase(k),input.auxdata,engine_state(k),pha(k));
+    [dr,dlon,dlat,dv,dgam,dal,dm,da,db,d1,d2,d3,d4,pdyn,hr,nx,ny,nz,thu,cd,cl,rho,p,Tenv,mach,rey1m,trim_fwd,trim_aft,ka_fwd,ka_aft] = dynamics(input.phase(k),input.auxdata,k);
 
     phaseout(k).dynamics = [dr,dlon,dlat,dv,dgam,dal,dm,da,db,d1,d2,d3,d4];
-    phaseout(k).path = [pdyn,hr,abs(nz)];
+
+
+    % phaseout(k).path = [pdyn,hr,abs(nz)];
+    % phaseout(k).path = [pdyn,hr,abs(nz),trim_fwd,trim_aft];
+    phaseout(k).path = [pdyn,hr,abs(nz),trim_fwd,trim_aft,ka_fwd,ka_aft];
 
   end
 

@@ -32,10 +32,10 @@ surfpack_load('lift_sup','externals/auxfiles/aero/build_points_lift_sup.dat',11,
 surfpack_load('drag_sub','externals/auxfiles/aero/build_points_drag_sub.dat',11,1);
 surfpack_load('drag_sup','externals/auxfiles/aero/build_points_drag_sup.dat',11,1);
 
-
-
-
-
+surfpack_load('trim_fwd','externals/auxfiles/perfo/build_points_TRIM_FWD.dat',7,1);
+surfpack_load('trim_aft','externals/auxfiles/perfo/build_points_TRIM_AFT.dat',7,1);
+surfpack_load('k_alpha_fwd','externals/auxfiles/perfo/build_points_K_ALPHA_FWD.dat',7,1);
+surfpack_load('k_alpha_aft','externals/auxfiles/perfo/build_points_K_ALPHA_AFT.dat',7,1);
 
 
 d2r = pi/180;
@@ -49,13 +49,27 @@ auxdata.f_ell = 3.3528106647474805e-03;
 auxdata.ispg0 = 9.80665;
 
 auxdata.soar_isp = 353.0;
-auxdata.soar_thu0 = 400000.0;
 auxdata.soar_sref = 120.0;
 auxdata.soar_na = 2.55;
-auxdata.fuel_mass = 23560.0;
-auxdata.us_mass = 6450.0;
+
+
+% % V1
+% auxdata.soar_thu0 = 400000.0;
+% auxdata.fuel_mass = 23560.0;
+% auxdata.us_mass = 6450.0;
+
+% % V2
+% auxdata.soar_thu0 = 650000.0;
+% auxdata.fuel_mass = 40000.0;
+% auxdata.us_mass = 10000.0;
+
+% V3
+auxdata.soar_thu0 = 400000.0;
+auxdata.fuel_mass = 25000.0;
+auxdata.us_mass = 6500.0;
+
 dry_mass_min = 3000.0;
-dry_mass_max = 15000.0;
+dry_mass_max = 20000.0;
 
 auxdata.atm_model = 1;
 auxdata.rho0 = 1.3;
@@ -86,9 +100,14 @@ bank_min = 0.0*d2r   ; bank_max = 0.0*d2r;
 daoa_min  = -0.5*d2r ; daoa_max = 0.5*d2r;
 dbank_min = 0.0*d2r  ; dbank_max= 0.0*d2r;
 
-dv1_min = -0.5   ; dv1_max = 0.5;
+% dv1_min = -0.5   ; dv1_max = 0.5;
+% dv2_min = -0.5   ; dv2_max = 0.5;
+% dv3_min = -0.5   ; dv3_max = 0.5;
+% dv4_min = -0.2   ; dv4_max = 0.5;
+
+dv1_min = 0.5   ; dv1_max = 0.5;
 dv2_min = -0.5   ; dv2_max = 0.5;
-dv3_min = -0.5   ; dv3_max = 0.5;
+dv3_min = -0.5   ; dv3_max = -0.5;
 dv4_min = -0.2   ; dv4_max = 0.5;
 
 ddv1_min = 0.0   ; ddv1_max = 0.0;
@@ -221,7 +240,7 @@ gam_min  = -80.0*d2r ; gam_max  = 80.0*d2r;
 al_min   = -2000*d2r ; al_max   = 2000*d2r;
 m_min    = dry_mass_min  ; m_max    = dry_mass_max;
 
-aoa_min  = -10*d2r   ; aoa_max  = 70.0*d2r;
+aoa_min  = -10*d2r   ; aoa_max  = 55.0*d2r;
 bank_min = 0*d2r     ; bank_max = 90*d2r;
 daoa_min  = -1*d2r   ; daoa_max = 0.1*d2r;
 dbank_min = -5*d2r   ; dbank_max= 5*d2r;
@@ -231,10 +250,15 @@ dv2_min = -0.5   ; dv2_max = 0.5;
 dv3_min = -0.5   ; dv3_max = 0.5;
 dv4_min = -0.2   ; dv4_max = 0.5;
 
-ddv1_min = 0.0   ; ddv1_max = 0.0;
-ddv2_min = 0.0   ; ddv2_max = 0.0;
-ddv3_min = 0.0   ; ddv3_max = 0.0;
-ddv4_min = 0.0   ; ddv4_max = 0.0;
+dv1_min = 0.5   ; dv1_max = 0.5;
+dv2_min = -0.5   ; dv2_max = 0.5;
+dv3_min = -0.5   ; dv3_max = -0.5;
+dv4_min = -0.2   ; dv4_max = 0.5;
+
+% ddv1_min = 0.0   ; ddv1_max = 0.0;
+% ddv2_min = 0.0   ; ddv2_max = 0.0;
+% ddv3_min = 0.0   ; ddv3_max = 0.0;
+% ddv4_min = 0.0   ; ddv4_max = 0.0;
 
 %------- Phase 4 -------%
 ph=4;N=50;
@@ -376,9 +400,9 @@ bounds.phase(ph).finalstate.upper(2) = lon_lnd;                                 
 bounds.phase(ph).finalstate.lower(3) = lat_lnd;                                     % latitude
 bounds.phase(ph).finalstate.upper(3) = lat_lnd;                                     %
 
-force_loop_number = 2;
-bounds.phase(ph).finalstate.lower(6) = (238.0+force_loop_number*360.0)*d2r;                          % heading     238
-bounds.phase(ph).finalstate.upper(6) = (238.0+force_loop_number*360.0)*d2r;                          %
+%force_loop_number = 2;
+%bounds.phase(ph).finalstate.lower(6) = (238.0+force_loop_number*360.0)*d2r;                          % heading     238
+%bounds.phase(ph).finalstate.upper(6) = (238.0+force_loop_number*360.0)*d2r;                          %
 
 bounds.phase(ph).finalstate.lower(5) = -20*d2r;                                     % fpa
 bounds.phase(ph).finalstate.upper(5) = -10*d2r;                                     %
@@ -399,20 +423,38 @@ end
 % constraints on pdyn,hr,nz
 %
 
+% trim_fwd,trim_aft,sm_fwd,sm_aft
+
 pdyn_min  = 0.0      ; pdyn_max = 100E3;
 hr_min    = 0.0      ; hr_max   = 100E3;
 nz_min  = 0.0        ; nz_max = 10;
 for k=1:3
-	bounds.phase(k).path.lower = [pdyn_min,hr_min,nz_min];
-	bounds.phase(k).path.upper = [pdyn_max,hr_max,nz_max];
+
+       % bounds.phase(k).path.lower = [pdyn_min,hr_min,nz_min];
+       % bounds.phase(k).path.upper = [pdyn_max,hr_max,nz_max];
+
+       % bounds.phase(k).path.lower = [pdyn_min,hr_min,nz_min,-4.0,-4.0];
+       % bounds.phase(k).path.upper = [pdyn_max,hr_max,nz_max, 6.0, 6.0];
+
+	bounds.phase(k).path.lower = [pdyn_min,hr_min,nz_min,-4.0,-4.0,-10.0,-10.0];
+	bounds.phase(k).path.upper = [pdyn_max,hr_max,nz_max, 6.0, 6.0,  4.0,  4.0];
+
 end
 
-pdyn_min  = 0.0      ; pdyn_max = 30E3;        % 10E3;
-hr_min    = 0.0      ; hr_max   = 230E3;       % 65E3;
-nz_min    = 0.0      ; nz_max   = 10;          % 5.0;
+pdyn_min  = 0.0      ; pdyn_max = 10E3;       % 10E3;
+hr_min    = 0.0      ; hr_max   = 80E3;       % 65E3;
+nz_min    = 0.0      ; nz_max   = 5;          % 5.0;
 for k=4:6
-	bounds.phase(k).path.lower = [pdyn_min,hr_min,nz_min];
-	bounds.phase(k).path.upper = [pdyn_max,hr_max,nz_max];
+
+       % bounds.phase(k).path.lower = [pdyn_min,hr_min,nz_min];
+       % bounds.phase(k).path.upper = [pdyn_max,hr_max,nz_max];
+
+       % bounds.phase(k).path.lower = [pdyn_min,hr_min,nz_min,-4.0,-4.0];
+       % bounds.phase(k).path.upper = [pdyn_max,hr_max,nz_max, 6.0, 6.0];
+
+	bounds.phase(k).path.lower = [pdyn_min,hr_min,nz_min,-4.0,-4.0,-10.0,-10.0];
+	bounds.phase(k).path.upper = [pdyn_max,hr_max,nz_max, 6.0, 6.0,  4.0,  4.0];
+
 end
 
 %%
@@ -429,8 +471,8 @@ end                                                      %
 bounds.eventgroup(6).lower = [5,100,10,10  ,10  ,10];   % phase durations
 bounds.eventgroup(6).upper = [5,300,10,1000,1000,1000]; % (fixed time between MECO and US release)
 
-bounds.eventgroup(7).lower = [100000];         % altitude
-bounds.eventgroup(7).upper = [200000];         %
+bounds.eventgroup(7).lower = [ 0.0*d2r, 100000.0];         % gam, aoa, altitude
+bounds.eventgroup(7).upper = [30.0*d2r, 200000.0];         %
 
 bounds.eventgroup(8).lower = [0];             % constraint on |daoa| & |dbnk|
 bounds.eventgroup(8).upper = [6];             % DIFFERENT w.r. to dsc
@@ -440,6 +482,9 @@ bounds.eventgroup(9).upper = [0];             %
 
 bounds.eventgroup(10).lower = [0];             % fuel limitations
 bounds.eventgroup(10).upper = [0];             %
+
+bounds.eventgroup(11).lower = [238.0*d2r];             % landing heading
+bounds.eventgroup(11).upper = [238.0*d2r];             %
 
 %%
 %% optimizer setup
@@ -547,14 +592,16 @@ filter = 0;
 if smooth == 1
 
 	sp = [0.001 0.01 0.001 0.00001 0.01 0.000001];
-        N = [10 50 10 50 50 50];
+       N  = [10 50 10 50 50 50];
 
 	for k=1:6
+
+              disp(['Smoothing Phase ',num2str(k)])
 
 		tt = output.result.solution.phase(k).time;
 
 		if filter == 1
-	                tt_filtered = linspace(tt(1),tt(end),N(k)+1);
+                     tt_filtered = linspace(tt(1),tt(end),N(k)+1);
 		else
 			tt_filtered = tt;
 		end
@@ -563,7 +610,7 @@ if smooth == 1
 		% Solution
 		%
 
-                for s = 1:13
+		for s = 1:13
 
 			xx = output.result.solution.phase(k).state(:,s);
 			fxx = fit(tt,xx,'smoothingspline',fitoptions('Method','Smooth','SmoothingParam',sp(k)));
@@ -572,7 +619,7 @@ if smooth == 1
 			new_phase(k).state(:,s) = xx_filtered;
 
 			if s > 7
-	                        dxx_filtered = differentiate(fxx,tt_filtered);
+				dxx_filtered = differentiate(fxx,tt_filtered);
 				new_phase(k).control(:,s-7) = dxx_filtered;
 			end
 
@@ -588,7 +635,7 @@ if smooth == 1
 
 		if filter == 1
 			mesh_phase(k).colpoints = N(k);
-	                mesh_phase(k).fraction = 1;
+			mesh_phase(k).fraction = 1;
 		end
 
 	end
@@ -600,7 +647,7 @@ if smooth == 1
 end
 
 
-
+disp('Smoothed')
 
 
 
@@ -614,22 +661,21 @@ end
 % get_cd_cl_rho_p();
 get_rnose();
 
-
-
-
-
-setup.guess = output.result.solution;     % using previous solution and meshing
-setup.mesh = output.result.setup.mesh;    %
-
-setup.nlp.options.maxiterations = 20;
-setup.mesh.maxiteration = 10;
-
-
-compute_second_run = 0;
+compute_second_run = 1;
 
 if compute_second_run == 1
-	output = gpops2(setup);
+
+       setup.guess = output.result.solution;     % using previous solution and meshing
+       setup.mesh = output.result.setup.mesh;    %
+       setup.nlp.options.maxiterations = 20;
+       setup.mesh.maxiteration = 20;
+
+       output = gpops2(setup);
+
+
+
 end
+
 
 %%
 %% save & plot
@@ -643,6 +689,9 @@ make_kml(output.result);
 disp('Solution')
 save('output','output');
 disp('Done')
+
+
+
 
 % clear mex; % clear mex memory
 

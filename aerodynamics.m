@@ -3,7 +3,7 @@
 % Begin Function: aerodynamics                  %
 %-----------------------------------------------%
 
-function [cd,cl,rho,p,Tenv,mach,rey1m] = aerodynamics(n,h,lon,glat,aoa_deg,v,tt,re,date0_doy,date0_sec,atm_model,ar_flag,dv1,dv2,dv3,dv4);
+function [cd,cl,rho,p,Tenv,mach,rey1m,trim_fwd,trim_aft,ka_fwd,ka_aft] = aerodynamics(k,n,h,lon,glat,aoa_deg,v,tt,re,date0_doy,date0_sec,atm_model,ar_flag,dv1,dv2,dv3,dv4);
 
     max_mach_eval_sub = 0.95;
     min_mach_eval_sup = 1.1;
@@ -24,6 +24,10 @@ function [cd,cl,rho,p,Tenv,mach,rey1m] = aerodynamics(n,h,lon,glat,aoa_deg,v,tt,
 
     cd = zeros(size(mach));
     cl = zeros(size(mach));
+    trim_fwd = zeros(size(mach));
+    trim_aft = zeros(size(mach));
+    ka_fwd = zeros(size(mach));
+    ka_aft = zeros(size(mach));
 
     for i = 1:length(mach)
 
@@ -42,6 +46,8 @@ function [cd,cl,rho,p,Tenv,mach,rey1m] = aerodynamics(n,h,lon,glat,aoa_deg,v,tt,
         dv_geo2 = dv2(i);
         dv_geo3 = dv3(i);
         dv_geo4 = dv4(i);
+
+        % Aero
 
         dvs = [dv_mach,dv_rey,dv_aoa,0.0,0.0,dv_geo1,dv_geo2,dv_geo3,dv_geo4,0.0,0.0];
 
@@ -71,6 +77,45 @@ function [cd,cl,rho,p,Tenv,mach,rey1m] = aerodynamics(n,h,lon,glat,aoa_deg,v,tt,
             cl(i) = cl_sub + (dv_mach-max_mach_eval_sub) * (cl_sup-cl_sub)/(min_mach_eval_sup-max_mach_eval_sub);
 
         end
+
+        % Perfo
+
+        if k >= 5 && dv_mach < 5.0
+
+            dvs_perfo = [dv_mach,dv_rey,dv_aoa,dv_geo1,dv_geo2,dv_geo3,dv_geo4];
+
+            val = surfpack_eval('trim_fwd',dvs_perfo);
+            if val < -0.25
+                val = val - (-0.25);
+            elseif val > 0.5
+                val = val - 0.5;
+            else
+                val = 0.0;
+            end
+            trim_fwd(i) = val*180.0/pi;
+
+            val = surfpack_eval('trim_aft',dvs_perfo);
+            if val < -0.25
+                val = val - (-0.25);
+            elseif val > 0.5
+                val = val - 0.5;
+            else
+                val = 0.0;
+            end
+            trim_aft(i) = val*180.0/pi;
+
+            ka_fwd(i) = surfpack_eval('k_alpha_fwd',dvs_perfo);
+            ka_aft(i) = surfpack_eval('k_alpha_aft',dvs_perfo);
+
+        else
+
+            trim_fwd(i) = 0.0;
+            trim_aft(i) = 0.0;
+            ka_fwd(i) = 0.0;
+            ka_aft(i) = 0.0;
+
+        end
+
     end
 
 end

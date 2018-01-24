@@ -3,7 +3,10 @@
 % BEGIN: function dynamics             %
 %--------------------------------------%
 
-function [dr,dlon,dlat,dv,dgam,dal,dm,da,db,d1,d2,d3,d4,pdyn,hr,nx,ny,nz,thu,cd,cl,rho,p,Tenv,mach,rey1m] = dynamics(in,auxdat,state,pha)
+function [dr,dlon,dlat,dv,dgam,dal,dm,da,db,d1,d2,d3,d4,pdyn,hr,nx,ny,nz,thu,cd,cl,rho,p,Tenv,mach,rey1m,trim_fwd,trim_aft,ka_fwd,ka_aft] = dynamics(in,auxdat,k)
+
+  engine_state = {'off' 'on' 'off' 'off' 'off' 'off'};
+  pha = {'a' 'a' 'a' 'r' 'r' 'r'};
 
   re = auxdat.re;
   gm = auxdat.gm;
@@ -48,14 +51,14 @@ function [dr,dlon,dlat,dv,dgam,dal,dm,da,db,d1,d2,d3,d4,pdyn,hr,nx,ny,nz,thu,cd,
   lon = reshape(lon,n,1);
   glat = reshape(glat,n,1);
 
-  if(strcmp(pha,'a')) ar_flag=1;end
-  if(strcmp(pha,'r')) ar_flag=2;end
+  if(strcmp(pha(k),'a')) ar_flag=1;end
+  if(strcmp(pha(k),'r')) ar_flag=2;end
 
   % [cd,cl,rho,p] = get_cd_cl_rho_p(int32(n),double(h),double(lon),...
   %     double(glat),double(aoa*180/pi),double(v),double(tt),double(re),...
   %     int32(date0_doy),double(date0_sec),int32(atm_model),int32(ar_flag));
 
-  [cd,cl,rho,p,Tenv,mach,rey1m] = aerodynamics(n,h,lon,...
+  [cd,cl,rho,p,Tenv,mach,rey1m,trim_fwd,trim_aft,ka_fwd,ka_aft] = aerodynamics(k,n,h,lon,...
       glat,aoa*180/pi,v,tt,re,...
       date0_doy,date0_sec,atm_model,ar_flag,...
       dv1,dv2,dv3,dv4);
@@ -67,7 +70,10 @@ function [dr,dlon,dlat,dv,dgam,dal,dm,da,db,d1,d2,d3,d4,pdyn,hr,nx,ny,nz,thu,cd,
   Tenv = reshape(Tenv,n,1);
   mach = reshape(mach,n,1);
   rey1m = reshape(rey1m,n,1);
-
+  trim_fwd = reshape(trim_fwd,n,1);
+  trim_aft = reshape(trim_aft,n,1);
+  ka_fwd = reshape(ka_fwd,n,1);
+  ka_aft = reshape(ka_aft,n,1);
 
   isp = auxdat.soar_isp;
   thu0 = auxdat.soar_thu0;
@@ -75,7 +81,7 @@ function [dr,dlon,dlat,dv,dgam,dal,dm,da,db,d1,d2,d3,d4,pdyn,hr,nx,ny,nz,thu,cd,
   na = auxdat.soar_na;
 
 
-  if(strcmp(state,'on'))
+  if(strcmp(engine_state(k),'on'))
       thu = thu0-na*p;
       C = cos(aoa);
       S = sin(aoa);
