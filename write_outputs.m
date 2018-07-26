@@ -10,8 +10,7 @@ function [tstate,tctrl,ttime,tph,tphid] = write_outputs(interp,phases,type,auxda
 
     fname = ['./output/output_' type '.dat'];
     fid = fopen(fname,'w');
-    fprintf(fid,'VARIABLES = "time","ph","h","lon","lat","v","gam","al","m","aoa","bank","dv1","dv2","dv3","dv4","pdyn","hr","nx","ny","nz","thu","cd","cl","rho","p","Tenv","mach","rey1m","trim_fwd","trim_aft","sm_fwd","sm_aft"\n');
-
+    fprintf(fid,'VARIABLES = "time","ph","h","lon","lat","v","gam","al","m","aoa","bank","tva","dv1","dv2","dv3","dv4","dv5","dv6","pdyn","hr","nx","ny","nz","thu","cd","cl","fd","fl","el","bf","rho","p","Tenv","mach","rey1m","trim_fwd","trim_aft","sm_fwd","sm_aft"\n');
 %    fprintf(fid,'VARIABLES = "time","ph","h","lon","lat","v","gam","al","m","aoa","bank","dv1","dv2","dv3","dv4"\n');
 
     for ip = phases
@@ -29,30 +28,30 @@ function [tstate,tctrl,ttime,tph,tphid] = write_outputs(interp,phases,type,auxda
         m = data.state(:,7);
         aoa = data.state(:,8);
         bank = data.state(:,9);
+        tva = data.state(:,10);
 
-        dv1 = data.state(:,9+1);
-        dv2 = data.state(:,9+2);
-        dv3 = data.state(:,9+3);
-        dv4 = data.state(:,9+4);
+        param = repmat(interp.parameter,length(time),1);
 
-        [dr,dlon,dlat,dv,dgam,dal,dm,da,db,d1,d2,d3,d4,pdyn,hr,nx,ny,nz,thu,cd,cl,rho,p,Tenv,mach,rey1m,trim_fwd,trim_aft,sm_fwd,sm_aft] = dynamics(data,auxdata,ip);
+        [dr,dlon,dlat,dv,dgam,dal,dm,da,db,dt,pdyn,hr,nx,ny,nz,thu,cd,cl,Fdrag,Flift,rho,p,Tenv,mach,rey1m,el_def,bf_def,trim_fwd,trim_aft,sm_fwd,sm_aft] = dynamics(data,param,auxdata,ip);
 
         daoa = data.control(:,1);
         dbank = data.control(:,2);
-
-        ddv1 = data.control(:,2+1);
-        ddv2 = data.control(:,2+2);
-        ddv3 = data.control(:,2+3);
-        ddv4 = data.control(:,2+4);
+        dtva = data.control(:,3);
 
         for k = 1:length(time)
 
             [alt,lon_conv,glat_conv] = latgeo(int32(1),auxdata.re,auxdata.f_ell,r(k),lon(k),lat(k));
             h = alt/1000;
 
-            fprintf(fid,'%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n',...
-                time(k),ip,h,lon(k)*r2d,lat(k)*r2d,v(k),gam(k)*r2d,al(k)*r2d,m(k),aoa(k)*r2d,bank(k)*r2d,dv1(k),dv2(k),dv3(k),dv4(k),...
-                pdyn(k),hr(k),nx(k),ny(k),nz(k),thu(k),cd(k),cl(k),rho(k),p(k),Tenv(k),mach(k),rey1m(k),trim_fwd(k),trim_aft(k),sm_fwd(k),sm_aft(k));
+            % fprintf(fid,'%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n',...
+            %     time(k),ip,h,lon(k)*r2d,lat(k)*r2d,v(k),gam(k)*r2d,al(k)*r2d,m(k),aoa(k)*r2d,bank(k)*r2d,...
+            %     pdyn(k),hr(k),nx(k),ny(k),nz(k),thu(k),cd(k),cl(k),rho(k),p(k),Tenv(k),mach(k),rey1m(k),trim_fwd(k),trim_aft(k),sm_fwd(k),sm_aft(k));
+
+            fprintf(fid,'%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n',...
+                time(k),ip,h,lon(k)*r2d,lat(k)*r2d,v(k),gam(k)*r2d,al(k)*r2d,m(k),aoa(k)*r2d,bank(k)*r2d,tva(k)*r2d,param(k,1),param(k,2),param(k,3),param(k,4),param(k,5),param(k,6),...
+                pdyn(k),hr(k),nx(k),ny(k),nz(k),thu(k),cd(k),cl(k),Fdrag(k),Flift(k),el_def(k)*r2d,bf_def(k)*r2d,rho(k),p(k),Tenv(k),mach(k),rey1m(k),trim_fwd(k),trim_aft(k),sm_fwd(k),sm_aft(k));
+
+
 
 %            fprintf(fid,'%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n',...
 %                time(k),ip,r(k),lon(k)*r2d,lat(k)*r2d,v(k),gam(k)*r2d,al(k)*r2d,m(k),aoa(k)*r2d,bank(k)*r2d,dv1(k),dv2(k),dv3(k),dv4(k));

@@ -3,7 +3,7 @@
 % BEGIN: function dynamics             %
 %--------------------------------------%
 
-function [dr,dlon,dlat,dv,dgam,dal,dm,da,db,d1,d2,d3,d4,pdyn,hr,nx,ny,nz,thu,cd,cl,rho,p,Tenv,mach,rey1m,trim_fwd,trim_aft,ka_fwd,ka_aft] = dynamics(in,auxdat,k)
+function [dr,dlon,dlat,dv,dgam,dal,dm,da,db,dt,pdyn,hr,nx,ny,nz,thu,cd,cl,Fdrag,Flift,rho,p,Tenv,mach,rey1m,el_def,bf_def,trim_fwd,trim_aft,ka_fwd,ka_aft] = dynamics(in,param,auxdat,k)
 
   engine_state = {'off' 'on' 'off' 'off' 'off' 'off'};
   pha = {'a' 'a' 'a' 'r' 'r' 'r'};
@@ -29,19 +29,18 @@ function [dr,dlon,dlat,dv,dgam,dal,dm,da,db,d1,d2,d3,d4,pdyn,hr,nx,ny,nz,thu,cd,
   m = in.state(:,7);
   aoa = in.state(:,8);
   bank = in.state(:,9);
+  tva = in.state(:,10);
 
-  dv1 = in.state(:,9+1);
-  dv2 = in.state(:,9+2);
-  dv3 = in.state(:,9+3);
-  dv4 = in.state(:,9+4);
+  dv1 = param(:,1);
+  dv2 = param(:,2);
+  dv3 = param(:,3);
+  dv4 = param(:,4);
+  dv5 = param(:,5);
+  dv6 = param(:,6);
 
   daoa = in.control(:,1);
   dbank = in.control(:,2);
-
-  ddv1 = in.control(:,2+1);
-  ddv2 = in.control(:,2+2);
-  ddv3 = in.control(:,2+3);
-  ddv4 = in.control(:,2+4);
+  dtva = in.control(:,3);
 
   n = length(r);
 
@@ -58,10 +57,10 @@ function [dr,dlon,dlat,dv,dgam,dal,dm,da,db,d1,d2,d3,d4,pdyn,hr,nx,ny,nz,thu,cd,
   %     double(glat),double(aoa*180/pi),double(v),double(tt),double(re),...
   %     int32(date0_doy),double(date0_sec),int32(atm_model),int32(ar_flag));
 
-  [cd,cl,rho,p,Tenv,mach,rey1m,trim_fwd,trim_aft,ka_fwd,ka_aft] = aerodynamics(k,n,h,lon,...
+  [cd,cl,rho,p,Tenv,mach,rey1m,el_def,bf_def,trim_fwd,trim_aft,ka_fwd,ka_aft] = aerodynamics(k,n,h,lon,...
       glat,aoa*180/pi,v,tt,re,...
       date0_doy,date0_sec,atm_model,ar_flag,...
-      dv1,dv2,dv3,dv4);
+      dv1,dv2,dv3,dv4,dv5,dv6);
 
   cd = reshape(cd,n,1);
   cl = reshape(cl,n,1);
@@ -132,11 +131,7 @@ function [dr,dlon,dlat,dv,dgam,dal,dm,da,db,d1,d2,d3,d4,pdyn,hr,nx,ny,nz,thu,cd,
 
   da = daoa;
   db = dbank;
-
-  d1 = ddv1;
-  d2 = ddv2;
-  d3 = ddv3;
-  d4 = ddv4;
+  dt = dtva;
 
   %
   % load factor in the body frame of the vehicle
@@ -145,15 +140,24 @@ function [dr,dlon,dlat,dv,dgam,dal,dm,da,db,d1,d2,d3,d4,pdyn,hr,nx,ny,nz,thu,cd,
   Fdrag=cd.*rho.*v.^2*sref/2;
 
   z=tt*0;z=[z z z];
-  FT=z;FT(:,1)=thu;      % body frame 
+
+
+  ct=cos(tva);st=sin(tva);
+
+  FT=z;
+  FT(:,1)= ct.*thu;      % body frame 
+  FT(:,3)=-st.*thu;      % body frame    % + or - ????????????
+
   FD=z;FD(:,1)=-Fdrag;   % aerodynamic frame
   FL=z;FL(:,3)=-Flift;   % aerodynamic frame
 
   ca=cos(aoa);sa=sin(aoa);
+
   x=ca.*FD(:,1)-sa.*FD(:,3);
   y=FD(:,2);
   z=sa.*FD(:,1)+ca.*FD(:,3);
   FD=[x y z];
+
   x=ca.*FL(:,1)-sa.*FL(:,3);
   y=FL(:,2);
   z=sa.*FL(:,1)+ca.*FL(:,3);

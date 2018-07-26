@@ -3,10 +3,13 @@
 % Begin Function: aerodynamics                  %
 %-----------------------------------------------%
 
-function [cd,cl,rho,p,Tenv,mach,rey1m,trim_fwd,trim_aft,ka_fwd,ka_aft] = aerodynamics(k,n,h,lon,glat,aoa_deg,v,tt,re,date0_doy,date0_sec,atm_model,ar_flag,dv1,dv2,dv3,dv4);
+function [cd,cl,rho,p,Tenv,mach,rey1m,el_def,bf_def,trim_fwd,trim_aft,ka_fwd,ka_aft] = aerodynamics(k,n,h,lon,glat,aoa_deg,v,tt,re,date0_doy,date0_sec,atm_model,ar_flag,dv1,dv2,dv3,dv4,dv5,dv6);
 
     max_mach_eval_sub = 0.95;
     min_mach_eval_sup = 1.1;
+
+    bf_bound_lower = -0.25;
+    bf_bound_upper = 0.5;
 
     [rho,p,ss] = get_rho_p_ss(int32(n),double(h),double(lon),double(glat),...
       double(tt),double(re),int32(date0_doy),double(date0_sec),int32(atm_model));
@@ -24,6 +27,8 @@ function [cd,cl,rho,p,Tenv,mach,rey1m,trim_fwd,trim_aft,ka_fwd,ka_aft] = aerodyn
 
     cd = zeros(size(mach));
     cl = zeros(size(mach));
+    el_def = zeros(size(mach));
+    bf_def = zeros(size(mach));
     trim_fwd = zeros(size(mach));
     trim_aft = zeros(size(mach));
     ka_fwd = zeros(size(mach));
@@ -36,6 +41,10 @@ function [cd,cl,rho,p,Tenv,mach,rey1m,trim_fwd,trim_aft,ka_fwd,ka_aft] = aerodyn
         dv_mach = mach(i);
         dv_rey = 0.0; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   log10(rey1m(i)) + 3.0/8.0*dv_mach - 7.0;  
 
+        if (dv_mach >= 8.0)
+            dv_mach = 8.0; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DATABASE NOT VALID BEYOND THAT: SPACE SHUTTLE BOOK FIX BEYOND MACH 10 ANYWAY ...
+        end
+
         if (dv_mach >= 1.0)
             dv_aoa = (aoa_deg(i) - (3.92857*dv_mach+3.57143)) / (1.78571*dv_mach+5.71429); % Supersonic
         else
@@ -46,10 +55,65 @@ function [cd,cl,rho,p,Tenv,mach,rey1m,trim_fwd,trim_aft,ka_fwd,ka_aft] = aerodyn
         dv_geo2 = dv2(i);
         dv_geo3 = dv3(i);
         dv_geo4 = dv4(i);
+        dv_geo5 = dv5(i);
+        dv_geo6 = dv6(i);
 
-        % Aero
 
-        dvs = [dv_mach,dv_rey,dv_aoa,0.0,0.0,dv_geo1,dv_geo2,dv_geo3,dv_geo4,0.0,0.0];
+        %%%%%%%%%
+        % Perfo %
+        %%%%%%%%%
+
+        if k >= 5 && dv_mach < 5.0
+
+            dvs_perfo = [dv_mach,dv_rey,dv_aoa,dv_geo1,dv_geo2,dv_geo3,dv_geo4,dv_geo5,dv_geo6];
+
+            val = surfpack_eval('trim_fwd',dvs_perfo);
+            if val < bf_bound_lower
+                el_def(i) = val - bf_bound_lower;
+                bf_def(i) = bf_bound_lower;
+            elseif val > bf_bound_upper
+                el_def(i) = val - bf_bound_upper;
+                bf_def(i) = bf_bound_upper;
+            else
+                el_def(i) = 0.0;
+                bf_def(i) = val;
+            end
+            trim_fwd(i) = el_def(i)*180.0/pi;
+
+            val = surfpack_eval('trim_aft',dvs_perfo);
+            if val < bf_bound_lower
+                el_def(i) = val - bf_bound_lower;
+                bf_def(i) = bf_bound_lower;
+            elseif val > bf_bound_upper
+                el_def(i) = val - bf_bound_upper;
+                bf_def(i) = bf_bound_upper;
+            else
+                el_def(i) = 0.0;
+                bf_def(i) = val;
+            end
+            trim_aft(i) = el_def(i)*180.0/pi;
+
+            ka_fwd(i) = surfpack_eval('k_alpha_fwd',dvs_perfo);
+            ka_aft(i) = surfpack_eval('k_alpha_aft',dvs_perfo);
+
+        else
+
+            el_def(i) = 0.0;
+            bf_def(i) = 0.0;
+
+            trim_fwd(i) = 0.0;
+            trim_aft(i) = 0.0;
+
+            ka_fwd(i) = 0.0;
+            ka_aft(i) = 0.0;
+
+        end
+
+        %%%%%%%%
+        % Aero %
+        %%%%%%%%
+
+        dvs = [dv_mach,dv_rey,dv_aoa,el_def(i),bf_def(i),dv_geo1,dv_geo2,dv_geo3,dv_geo4,dv_geo5,dv_geo6];
 
         if (dv_mach <= max_mach_eval_sub)
 
@@ -78,44 +142,7 @@ function [cd,cl,rho,p,Tenv,mach,rey1m,trim_fwd,trim_aft,ka_fwd,ka_aft] = aerodyn
 
         end
 
-        % Perfo
-
-        if k >= 5 && dv_mach < 5.0
-
-            dvs_perfo = [dv_mach,dv_rey,dv_aoa,dv_geo1,dv_geo2,dv_geo3,dv_geo4];
-
-            val = surfpack_eval('trim_fwd',dvs_perfo);
-            if val < -0.25
-                val = val - (-0.25);
-            elseif val > 0.5
-                val = val - 0.5;
-            else
-                val = 0.0;
-            end
-            trim_fwd(i) = val*180.0/pi;
-
-            val = surfpack_eval('trim_aft',dvs_perfo);
-            if val < -0.25
-                val = val - (-0.25);
-            elseif val > 0.5
-                val = val - 0.5;
-            else
-                val = 0.0;
-            end
-            trim_aft(i) = val*180.0/pi;
-
-            ka_fwd(i) = surfpack_eval('k_alpha_fwd',dvs_perfo);
-            ka_aft(i) = surfpack_eval('k_alpha_aft',dvs_perfo);
-
-        else
-
-            trim_fwd(i) = 0.0;
-            trim_aft(i) = 0.0;
-            ka_fwd(i) = 0.0;
-            ka_aft(i) = 0.0;
-
-        end
-
+        
     end
 
 end

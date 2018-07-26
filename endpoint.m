@@ -5,6 +5,8 @@
 
 function output = s3toEndpoint(input)
 
+	global load_cases
+
 	%
 	% Variables at Start and End of each phase
 	%
@@ -15,6 +17,27 @@ function output = s3toEndpoint(input)
 		x0{k} = input.phase(k).initialstate;
 		xf{k} = input.phase(k).finalstate;
 	end
+
+	s = input.parameter;
+
+	dv_geo1 = s(1);
+	dv_geo2 = s(2);
+	dv_geo3 = s(3);
+	dv_geo4 = s(4);
+	dv_geo5 = s(5);
+	dv_geo6 = s(6);
+
+	% % OPTION A
+	 dry_mass = compute_dry_mass_bis(dv_geo1,dv_geo2,dv_geo3,dv_geo4);
+
+	% OPTION B
+	dvs = reverse_variable_change(load_cases,dv_geo1,dv_geo2,dv_geo3,dv_geo4,dv_geo5,dv_geo6);
+	dry_mass_current_step = input.phase(Nph).finalstate(7); % WITHOUT PAYLOAD MASS
+	dry_mass = compute_dry_mass(dvs, dry_mass_current_step, input.auxdata);
+
+
+
+
 
 	%
 	% Objective Function:
@@ -73,17 +96,6 @@ function output = s3toEndpoint(input)
 	% event group 9
 	%
 
-	dv_geo1 = xf{6}(9+1);
-	dv_geo2 = xf{6}(9+2);
-	dv_geo3 = xf{6}(9+3);
-	dv_geo4 = xf{6}(9+4);
-
-	% dv_geo1 = 0.0;
-	% dv_geo2 = 0.0;
-	% dv_geo3 = 0.0;
-	% dv_geo4 = 0.0;
-
-	dry_mass = dry_mass(dv_geo1,dv_geo2,dv_geo3,dv_geo4);
 	output.eventgroup(9).event = [xf{6}(7) - dry_mass];
 
 	%
@@ -110,7 +122,12 @@ end
 % End Function:  endpoint                       %
 %-----------------------------------------------%
 
-function dry_mass = dry_mass(dv_geo1,dv_geo2,dv_geo3,dv_geo4)
+
+
+
+
+
+function dry_mass = compute_dry_mass_bis(dv_geo1,dv_geo2,dv_geo3,dv_geo4)
 
   % strake
   % x = 4.44779 y + 2.6669425 # - 5.11669
@@ -178,4 +195,43 @@ function dry_mass = dry_mass(dv_geo1,dv_geo2,dv_geo3,dv_geo4)
 end
 
 
+function dvs = reverse_variable_change(load_cases,dv_geo1,dv_geo2,dv_geo3,dv_geo4,dv_geo5,dv_geo6)
 
+  sizes = size(load_cases);
+
+  dvs = zeros(sizes(1),14);
+
+  for index = 1:sizes(1)
+
+        dv_mach = load_cases(index,1);
+        Reynolds = load_cases(index,2);
+        AoA = load_cases(index,3);
+
+        dv_rey = log10(Reynolds) + 3.0/8.0*dv_mach - 7.0;
+    
+        if dv_mach >= 1.0
+            dv_aoa = (AoA - (3.92857*dv_mach+3.57143)) / (1.78571*dv_mach+5.71429); % Supersonic
+        else
+            dv_aoa = AoA/7.5-1.0; % Subsonic
+        end
+
+        dv_nx = load_cases(index,4);
+        dv_nz = load_cases(index,5);
+        dv_thrust = load_cases(index,6);
+        dv_pdyn = load_cases(index,7);
+        dv_fuel_mass = load_cases(index,8);
+
+        dv_mach      = min(    8.0, max(    1.1,      dv_mach));
+        dv_rey       = min(    1.0, max(   -1.0,       dv_rey));
+        dv_aoa       = min(    1.0, max(   -1.0,       dv_aoa));
+        dv_nx        = min(    6.0, max(   -3.0,        dv_nx));
+        dv_nz        = min(    3.0, max(   -6.0,        dv_nz));
+        dv_thrust    = min(  3.0e6, max(    0.0,    dv_thrust));
+        dv_pdyn      = min( 35.0e3, max( 1.0e-6,      dv_pdyn));
+        dv_fuel_mass = min( 26.0e3, max(    0.0, dv_fuel_mass));
+
+        dvs(index,:) = [dv_mach, dv_rey, dv_aoa, dv_nx, dv_nz, dv_thrust, dv_pdyn, dv_fuel_mass, dv_geo1, dv_geo2, dv_geo3, dv_geo4, dv_geo5, dv_geo6];
+
+    end
+
+end

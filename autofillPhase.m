@@ -10,11 +10,8 @@ function [] = autofillPhase ()
 	       gam_max al_0 al_f al_min al_max m_0 m_f m_min m_max aoa_0 aoa_f ...
 	       aoa_min aoa_max bank_0 bank_f bank_min bank_max daoa_0 daoa_f ...
 	       daoa_min daoa_max dbank_0 dbank_f dbank_min dbank_max ...
-	       pdyn_min pdyn_max hr_min hr_max gacc_min gacc_max ...
-	       dv1_0 dv1_f dv2_0 dv2_f dv3_0 dv3_f dv4_0 dv4_f ...
-	       ddv1_0 ddv1_f ddv2_0 ddv2_f ddv3_0 ddv3_f ddv4_0 ddv4_f ...
-	       dv1_min dv1_max dv2_min dv2_max dv3_min dv3_max dv4_min dv4_max ...
-	       ddv1_min ddv1_max ddv2_min ddv2_max ddv3_min ddv3_max ddv4_min ddv4_max
+           tva_0 tva_f tva_min tva_max dtva_0 dtva_f dtva_min dtva_max ...
+	       pdyn_min pdyn_max hr_min hr_max gacc_min gacc_max
 
 	%
 	% bounds
@@ -33,15 +30,15 @@ function [] = autofillPhase ()
 	xxx.finaltime.lower = t_min;
 	xxx.finaltime.upper = t_max;
 
-	xxx.initialstate.lower = [r_min,lon_min,lat_min,v_min,gam_min,al_min,m_min,aoa_min,bank_min,dv1_min,dv2_min,dv3_min,dv4_min]; 
-	xxx.initialstate.upper = [r_max,lon_max,lat_max,v_max,gam_max,al_max,m_max,aoa_max,bank_max,dv1_max,dv2_max,dv3_max,dv4_max];
-	xxx.state.lower =        [r_min,lon_min,lat_min,v_min,gam_min,al_min,m_min,aoa_min,bank_min,dv1_min,dv2_min,dv3_min,dv4_min];
-	xxx.state.upper =        [r_max,lon_max,lat_max,v_max,gam_max,al_max,m_max,aoa_max,bank_max,dv1_max,dv2_max,dv3_max,dv4_max];
-	xxx.finalstate.lower =   [r_min,lon_min,lat_min,v_min,gam_min,al_min,m_min,aoa_min,bank_min,dv1_min,dv2_min,dv3_min,dv4_min];
-	xxx.finalstate.upper =   [r_max,lon_max,lat_max,v_max,gam_max,al_max,m_max,aoa_max,bank_max,dv1_max,dv2_max,dv3_max,dv4_max];
+	xxx.initialstate.lower = [r_min,lon_min,lat_min,v_min,gam_min,al_min,m_min,aoa_min,bank_min,tva_min]; 
+	xxx.initialstate.upper = [r_max,lon_max,lat_max,v_max,gam_max,al_max,m_max,aoa_max,bank_max,tva_max];
+	xxx.state.lower =        [r_min,lon_min,lat_min,v_min,gam_min,al_min,m_min,aoa_min,bank_min,tva_min];
+	xxx.state.upper =        [r_max,lon_max,lat_max,v_max,gam_max,al_max,m_max,aoa_max,bank_max,tva_max];
+	xxx.finalstate.lower =   [r_min,lon_min,lat_min,v_min,gam_min,al_min,m_min,aoa_min,bank_min,tva_min];
+	xxx.finalstate.upper =   [r_max,lon_max,lat_max,v_max,gam_max,al_max,m_max,aoa_max,bank_max,tva_max];
 
-	xxx.control.lower = [daoa_min,dbank_min,ddv1_min,ddv2_min,ddv3_min,ddv4_min];
-	xxx.control.upper = [daoa_max,dbank_max,ddv1_max,ddv2_max,ddv3_max,ddv4_max];
+	xxx.control.lower = [daoa_min,dbank_min,dtva_min];
+	xxx.control.upper = [daoa_max,dbank_max,dtva_max];
 
 	bounds.phase(ph)=xxx;
 
@@ -62,12 +59,9 @@ function [] = autofillPhase ()
 	[m_0;m_f],...
 	[aoa_0;aoa_f],...
 	[bank_0;bank_f],...
-	[dv1_0;dv1_f],...
-	[dv2_0;dv2_f],...
-	[dv3_0;dv3_f],...
-	[dv4_0;dv4_f]];
+	[tva_0;tva_f]];
 
-	xxx.control = [[daoa_0;daoa_f],[dbank_0;dbank_f],[ddv1_0;ddv1_f],[ddv2_0;ddv2_f],[ddv3_0;ddv3_f],[ddv4_0;ddv4_f]];
+	xxx.control = [[daoa_0;daoa_f],[dbank_0;dbank_f],[dtva_0;dtva_f]];
 
 	guess.phase(ph)=xxx;
 
